@@ -1,4 +1,5 @@
 import os
+import shutil
 import streamlit as st
 from llama_index.core import Settings, SummaryIndex, VectorStoreIndex, SimpleDirectoryReader
 from llama_index.core.node_parser import SentenceSplitter
@@ -15,13 +16,18 @@ Settings.llm = OpenAI(model="gpt-3.5-turbo")
 Settings.embed_model = OpenAIEmbedding(model="text-embedding-ada-002")
 llm = OpenAI(api_key=openai_api_key, temperature=0)
 
+folder_path = "docs"
+
 st.title("Ask My Docs 📄🧠")
 st.write("Upload your documents and ask questions about them!")
 
 uploaded_files = st.file_uploader("Upload documents", accept_multiple_files=True, type=["pdf", "txt", "md"])
 
 if uploaded_files:
-    os.makedirs("docs", exist_ok=True)
+    if os.path.isdir(folder_path):
+        shutil.rmtree(folder_path)
+    os.makedirs(folder_path)
+
     for file in uploaded_files:
         with open(os.path.join("docs", file.name), "wb") as f:
             f.write(file.read())
