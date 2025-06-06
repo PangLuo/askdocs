@@ -1,5 +1,6 @@
 streamlit
 llama-index
+llama-index-embeddings-huggingface
 openai
 python-dotenv
 ruff

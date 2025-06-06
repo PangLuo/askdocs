@@ -2,6 +2,7 @@ import os
 import shutil
 from typing import List
 
+import torch
 import streamlit as st
 from llama_index.core import (
     Settings,
@@ -12,14 +13,18 @@ from llama_index.core import (
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.tools import FunctionTool, QueryEngineTool
 from llama_index.core.vector_stores import FilterCondition, MetadataFilters
-from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+
 from llama_index.llms.openai import OpenAI
 
+torch.classes.__path__ = []
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 # Set LLM
 Settings.llm = OpenAI(model="gpt-3.5-turbo")
-Settings.embed_model = OpenAIEmbedding(model="text-embedding-ada-002")
+Settings.embed_model = HuggingFaceEmbedding(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
 llm = OpenAI(api_key=openai_api_key, temperature=0)
 
 folder_path = "docs"
