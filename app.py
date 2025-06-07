@@ -2,7 +2,6 @@ import os
 import shutil
 from typing import List
 
-import torch
 import streamlit as st
 from llama_index.core import (
     Settings,
@@ -15,17 +14,22 @@ from llama_index.core.tools import FunctionTool, QueryEngineTool
 from llama_index.core.vector_stores import FilterCondition, MetadataFilters
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
-from llama_index.llms.openai import OpenAI
+from llama_index.llms.openai_like import OpenAILike
 
-torch.classes.__path__ = []
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 # Set LLM
-Settings.llm = OpenAI(model="gpt-3.5-turbo")
 Settings.embed_model = HuggingFaceEmbedding(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
-llm = OpenAI(api_key=openai_api_key, temperature=0)
+llm = OpenAILike(
+    model="mistralai/Mistral-7B-Instruct-v0.3",
+    api_base="http://81.166.162.13:12961/v1",
+    api_key="fake",
+    context_window=32768,
+    is_chat_model=True,  # Changed to True
+    is_function_calling_model=True,
+)
 
 folder_path = "docs"
 
@@ -92,7 +96,12 @@ if uploaded_files:
     question = st.text_input("Ask a question about your docs:")
     if question:
         with st.spinner("Thinking..."):
-            response = llm.predict_and_call(
-                [vector_query_tool, summary_tool], question, verbose=True
-            )
-            st.markdown(f"**Answer:** {response}")
+            try:
+                response = llm.predict_and_call(
+                    [vector_query_tool, summary_tool], question, verbose=True
+                )
+            except ValueError:
+                # Fallback if no tools are used
+                print("some error occurred, falling back to LLM completion")
+                response = llm.complete(question)
+            st.markdown(f"Answer: {response}")
