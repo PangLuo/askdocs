@@ -11,9 +11,9 @@ from llama_index.llms.openai import OpenAI
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 # Set LLM
-Settings.llm = OpenAI(model="gpt-3.5-turbo")
+llm = OpenAI(api_key=openai_api_key, temperature=0, model="gpt-3.5-turbo")
+Settings.llm = llm
 Settings.embed_model = OpenAIEmbedding(model="text-embedding-ada-002")
-llm = OpenAI(api_key=openai_api_key, temperature=0)
 
 st.title("Ask My Docs 📄🧠")
 st.write("Upload your documents and ask questions about them!")
